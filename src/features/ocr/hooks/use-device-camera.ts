@@ -11,10 +11,41 @@ export function useDeviceCamera() {
 
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isCameraLoading, setIsCameraLoading] = useState(false);
+  const [isCameraReady, setIsCameraReady] = useState(false);
 
   const isCameraSupported =
     typeof navigator !== "undefined" &&
     Boolean(navigator.mediaDevices?.getUserMedia);
+
+  async function attachStreamToVideo(): Promise<void> {
+    const video = videoRef.current;
+    const stream = streamRef.current;
+
+    if (!video || !stream) {
+      return;
+    }
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.setAttribute("muted", "true");
+    video.setAttribute("playsinline", "true");
+    video.setAttribute("autoplay", "true");
+
+    if (video.srcObject !== stream) {
+      video.srcObject = stream;
+    }
+
+    if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+      await new Promise<void>((resolve) => {
+        video.addEventListener("loadedmetadata", () => resolve(), { once: true });
+      });
+    }
+
+    await video.play();
+    setIsCameraReady(true);
+  }
 
   async function startCamera(): Promise<boolean> {
     if (!isCameraSupported) {
@@ -26,6 +57,7 @@ export function useDeviceCamera() {
     }
 
     setIsCameraLoading(true);
+    setIsCameraReady(false);
 
     try {
       stopCamera();
@@ -33,11 +65,6 @@ export function useDeviceCamera() {
       const stream = await navigator.mediaDevices.getUserMedia(CAMERA_CONSTRAINTS);
       streamRef.current = stream;
       setIsCameraOpen(true);
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play().catch(() => undefined);
-      }
 
       return true;
     } catch {
@@ -47,6 +74,7 @@ export function useDeviceCamera() {
           "Camera access was blocked or unavailable. You can still upload from file picker.",
       });
       setIsCameraOpen(false);
+      setIsCameraReady(false);
       return false;
     } finally {
       setIsCameraLoading(false);
@@ -65,6 +93,7 @@ export function useDeviceCamera() {
     }
 
     setIsCameraOpen(false);
+    setIsCameraReady(false);
   }
 
   async function capturePhoto(): Promise<File | null> {
@@ -122,6 +151,16 @@ export function useDeviceCamera() {
   }
 
   useEffect(() => {
+    if (!isCameraOpen) {
+      return;
+    }
+
+    attachStreamToVideo().catch(() => {
+      setIsCameraReady(false);
+    });
+  }, [isCameraOpen]);
+
+  useEffect(() => {
     return () => {
       stopCamera();
     };
@@ -132,6 +171,7 @@ export function useDeviceCamera() {
     isCameraSupported,
     isCameraOpen,
     isCameraLoading,
+    isCameraReady,
     startCamera,
     stopCamera,
     capturePhoto,

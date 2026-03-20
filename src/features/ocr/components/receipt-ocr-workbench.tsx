@@ -79,15 +79,32 @@ export function ReceiptOcrWorkbench() {
     videoRef,
     isCameraOpen,
     isCameraLoading,
+    isCameraReady,
     startCamera,
     stopCamera,
     capturePhoto,
   } = useDeviceCamera();
 
+  function shouldUseNativeCameraCapture() {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    const coarsePointer = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+    return coarsePointer && window.innerWidth < 1024;
+  }
+
   async function openCamera() {
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setShowUploadPanelMobile(true);
     }
+
+    if (shouldUseNativeCameraCapture()) {
+      stopCamera();
+      cameraInputRef.current?.click();
+      return;
+    }
+
     const started = await startCamera();
     if (!started) {
       cameraInputRef.current?.click();
@@ -173,9 +190,9 @@ export function ReceiptOcrWorkbench() {
                       playsInline
                     />
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      <Button onClick={handleCapturePhoto} type="button">
+                      <Button disabled={!isCameraReady} onClick={handleCapturePhoto} type="button">
                         <Camera className="mr-2 h-4 w-4" />
-                        Capture Photo
+                        {isCameraReady ? "Capture Photo" : "Preparing Camera..."}
                       </Button>
                       <Button onClick={stopCamera} type="button" variant="secondary">
                         <CameraOff className="mr-2 h-4 w-4" />
