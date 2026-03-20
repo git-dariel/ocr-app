@@ -10,6 +10,7 @@ import {
   REQUEST_ERROR_FALLBACK_MESSAGE,
 } from "@/features/ocr/constants";
 import type { OcrReceiptResponse } from "@/features/ocr/types";
+import { optimizeUploadImage } from "@/features/ocr/utils/optimize-upload-image";
 
 export function useReceiptOcr() {
   const [file, setFile] = useState<File | null>(null);
@@ -48,10 +49,12 @@ export function useReceiptOcr() {
     setIsSubmitting(true);
 
     try {
-      const response = await sileo.promise(extractReceiptText(file), {
+      const uploadFile = await optimizeUploadImage(file);
+
+      const response = await sileo.promise(extractReceiptText(uploadFile), {
         loading: {
           title: "Processing receipt",
-          description: "Preprocessing image and extracting text...",
+          description: "Optimizing image, preprocessing, and extracting text...",
         },
         success: (data) => ({
           title: "Text extracted",

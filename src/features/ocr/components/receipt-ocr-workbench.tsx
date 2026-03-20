@@ -230,6 +230,9 @@ export function ReceiptOcrWorkbench() {
                   Max size follows API limit (`OCR_MAX_FILE_SIZE_BYTES`, default 10MB).
                 </p>
                 <p className="text-xs text-slate-500">
+                  Large camera photos are optimized automatically before upload to improve mobile compatibility.
+                </p>
+                <p className="text-xs text-slate-500">
                   Direct camera preview works on secure contexts (localhost/https) when permission is granted.
                 </p>
               </div>

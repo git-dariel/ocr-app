@@ -4,6 +4,7 @@ import {
   OCR_API_ENDPOINT,
   REQUEST_ERROR_FALLBACK_MESSAGE,
   SUPPORTED_IMAGE_TYPES,
+  UPLOAD_TOO_LARGE_ERROR_MESSAGE,
 } from "@/features/ocr/constants";
 
 const SUPPORTED_TYPES = new Set<string>(SUPPORTED_IMAGE_TYPES);
@@ -21,15 +22,46 @@ export async function extractReceiptText(file: File): Promise<OcrReceiptResponse
     body: formData,
   });
 
-  const body = (await response.json()) as OcrReceiptResponse | OcrApiErrorPayload;
+  const rawBody = await response.text();
+  const body = parseApiBody(rawBody);
 
   if (!response.ok) {
     const message =
-      "error" in body && body.error?.message
+      body && "error" in body && body.error?.message
         ? body.error.message
-        : REQUEST_ERROR_FALLBACK_MESSAGE;
+        : getUploadErrorMessage(rawBody);
     throw new Error(message);
   }
 
+  if (!body) {
+    throw new Error(REQUEST_ERROR_FALLBACK_MESSAGE);
+  }
+
   return body as OcrReceiptResponse;
+}
+
+function parseApiBody(rawBody: string): OcrReceiptResponse | OcrApiErrorPayload | null {
+  if (!rawBody) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawBody) as OcrReceiptResponse | OcrApiErrorPayload;
+  } catch {
+    return null;
+  }
+}
+
+function getUploadErrorMessage(rawBody: string): string {
+  const normalized = rawBody.toLowerCase();
+
+  if (
+    normalized.includes("request entity too large") ||
+    normalized.includes("body exceeded") ||
+    normalized.includes("payload too large")
+  ) {
+    return UPLOAD_TOO_LARGE_ERROR_MESSAGE;
+  }
+
+  return REQUEST_ERROR_FALLBACK_MESSAGE;
 }

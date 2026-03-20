@@ -1,4 +1,6 @@
 export const OCR_API_ENDPOINT = "/api/ocr";
+export const OCR_UPLOAD_TARGET_MAX_FILE_SIZE_BYTES = 4_000_000;
+export const OCR_UPLOAD_IMAGE_MAX_DIMENSION_PX = 2200;
 
 export const SUPPORTED_IMAGE_TYPES = [
   "image/jpeg",
@@ -13,6 +15,8 @@ export const FILE_VALIDATION_ERROR_MESSAGE =
   "Unsupported file type. Use JPEG, PNG, WEBP, or TIFF.";
 export const REQUEST_ERROR_FALLBACK_MESSAGE =
   "Unable to extract text from the uploaded receipt.";
+export const UPLOAD_TOO_LARGE_ERROR_MESSAGE =
+  "The selected photo is too large to upload. Retake it with a lower resolution or choose a smaller image.";
 export const EMPTY_FILE_ERROR_MESSAGE = "Select a receipt image first.";
 
 export const COPY_FEEDBACK_DURATION_MS = 1400;
