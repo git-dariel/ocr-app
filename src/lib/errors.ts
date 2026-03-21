@@ -3,6 +3,7 @@ interface OcrApiErrorOptions {
   code: string;
   message: string;
   details?: Record<string, unknown>;
+  cause?: unknown;
 }
 
 export class OcrApiError extends Error {
@@ -11,7 +12,7 @@ export class OcrApiError extends Error {
   public readonly details?: Record<string, unknown>;
 
   constructor(options: OcrApiErrorOptions) {
-    super(options.message);
+    super(options.message, { cause: options.cause });
     this.name = "OcrApiError";
     this.status = options.status;
     this.code = options.code;

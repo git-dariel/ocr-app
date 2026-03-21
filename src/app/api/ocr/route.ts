@@ -15,13 +15,19 @@ export async function POST(request: Request) {
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     const normalizedError = normalizeOcrError(error);
+    const errorCause =
+      error instanceof Error && error.cause instanceof Error
+        ? error.cause.stack ?? error.cause.message
+        : error instanceof Error
+          ? error.stack
+          : String(error);
 
     if (normalizedError.status >= 500) {
       console.error("OCR API failure", {
         code: normalizedError.code,
         message: normalizedError.message,
         details: normalizedError.details,
-        cause: error instanceof Error ? error.stack : String(error),
+        cause: errorCause,
       });
     }
 

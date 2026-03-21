@@ -12,6 +12,17 @@ type ServiceAccountCredentials = {
   project_id?: string;
 };
 
+type VisionProviderError = Error & {
+  code?: number | string;
+  details?: string;
+};
+
+type VisionProviderDetails = {
+  providerCode: number | string | null;
+  providerMessage: string;
+  providerDetails: string;
+};
+
 let visionClient: ImageAnnotatorClient | undefined;
 
 function getVisionClient(): ImageAnnotatorClient {
@@ -91,12 +102,83 @@ export async function extractReceiptTextWithVision(
       throw error;
     }
 
-    throw new OcrApiError({
+    throw mapVisionError(error);
+  }
+}
+
+function mapVisionError(error: unknown): OcrApiError {
+  const providerError = asVisionProviderError(error);
+  const providerDetails = buildProviderDetails(providerError);
+
+  if (providerDetails.providerCode === 7) {
+    const billingDisabled =
+      providerDetails.providerMessage.includes("billing to be enabled") ||
+      providerDetails.providerDetails.includes("billing to be enabled");
+
+    return new OcrApiError({
+      status: 503,
+      code: billingDisabled
+        ? "OCR_PROVIDER_BILLING_DISABLED"
+        : "OCR_PROVIDER_PERMISSION_DENIED",
+      message: billingDisabled
+        ? "Google Vision OCR is unavailable because billing is not enabled for the configured Google Cloud project."
+        : "Google Vision OCR rejected the request with insufficient permissions.",
+      details: providerDetails,
+      cause: providerError,
+    });
+  }
+
+  if (providerDetails.providerCode === 16) {
+    return new OcrApiError({
+      status: 500,
+      code: "OCR_PROVIDER_MISCONFIGURED",
+      message: "Google Vision OCR credentials are missing or invalid.",
+      details: providerDetails,
+      cause: providerError,
+    });
+  }
+
+  if (providerDetails.providerCode === 14 || providerDetails.providerCode === 4) {
+    return new OcrApiError({
       status: 502,
       code: "OCR_PROVIDER_UNAVAILABLE",
       message: "Unable to reach Google Vision OCR service.",
+      details: providerDetails,
+      cause: providerError,
     });
   }
+
+  return new OcrApiError({
+    status: 502,
+    code: "OCR_PROVIDER_UNAVAILABLE",
+    message: "Google Vision OCR request failed before a response was returned.",
+    details: providerDetails,
+    cause: providerError,
+  });
+}
+
+function asVisionProviderError(error: unknown): VisionProviderError {
+  if (error instanceof Error) {
+    return error as VisionProviderError;
+  }
+
+  return new Error(String(error));
+}
+
+function buildProviderDetails(error: VisionProviderError): VisionProviderDetails {
+  return {
+    providerCode: normalizeProviderCode(error.code),
+    providerMessage: error.message,
+    providerDetails: error.details ?? "",
+  };
+}
+
+function normalizeProviderCode(code: VisionProviderError["code"]): number | string | null {
+  if (typeof code === "number" || typeof code === "string") {
+    return code;
+  }
+
+  return null;
 }
 
 function buildOcrMetadata(response: AnnotateImageResponse): OcrMetadata {
