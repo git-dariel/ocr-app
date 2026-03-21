@@ -1,5 +1,5 @@
-import { ReceiptOcrWorkbench } from "@/features/ocr/components/receipt-ocr-workbench";
+import { redirect } from "next/navigation";
 
 export default function ExtractPage() {
-  return <ReceiptOcrWorkbench />;
+  redirect("/dashboard/extract");
 }

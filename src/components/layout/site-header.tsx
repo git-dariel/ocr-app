@@ -1,162 +1,175 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { useState } from "react";
+import { ArrowUpRight, X, Menu } from "lucide-react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Home" },
-  { href: "/extract", label: "Extract" },
+  { href: "#workflow", label: "Workflow" },
+  { href: "#workspace", label: "Workspace" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "#cta", label: "Start" },
 ];
 
 export function SiteHeader() {
-  const pathname = usePathname();
-  const [showNav, setShowNav] = useState<boolean>(false);
-  const [hidden, setHidden] = useState(false);
-  // Keep desktop nav width proportional to the currently configured links.
-  const desktopExpandedWidth = Math.min(
-    Math.max(
-      NAV_ITEMS.reduce((acc, item) => acc + item.label.length * 16 + 56, 220),
-      420,
-    ),
-    900,
-  );
-
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { scrollY } = useScroll();
+  const navRef = useRef<HTMLElement>(null);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious() ?? 0;
-
-    if (latest > previous && latest > 150) {
-      setHidden(true);
-      setShowNav(false);
-    } else {
-      setHidden(false);
-    }
+    setScrolled(latest > 24);
   });
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <header className="relative z-50 h-24">
+    <motion.header
+      ref={navRef}
+      className="fixed inset-x-0 top-0 z-50"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {/* Nav pill */}
       <motion.nav
-        className="fixed inset-x-0 top-4 mx-auto flex h-14 w-[95%] max-w-[95vw] items-center gap-4 overflow-hidden rounded-full border border-blue-200/90 bg-white/90 px-3 font-sans font-medium text-slate-700 shadow-[0_8px_30px_-18px_rgba(30,64,175,0.45)] backdrop-blur-xl max-sm:justify-between sm:w-auto"
-        style={{ zIndex: 1000 }}
-        variants={{
-          long: { maxWidth: desktopExpandedWidth },
-          short: { maxWidth: 280 },
-          hideNav: {
-            height: 56,
-            borderRadius: 50,
-            alignItems: "center",
-            paddingTop: 0,
-            transition: { delay: 0, duration: 0.3 },
-          },
-          showNav: {
-            height: 130,
-            borderRadius: 22,
-            alignItems: "start",
-            paddingTop: 8,
-            transition: { delay: 0 },
-          },
-        }}
-        initial={"short"}
-        animate={[hidden ? "short" : "long", showNav ? "showNav" : "hideNav"]}
-        transition={{
-          duration: 0.6,
-          type: "spring",
-          stiffness: 80,
-          damping: 14,
-        }}
+        className={cn(
+          "mx-auto mt-4 flex w-[calc(100%-1.5rem)] max-w-7xl items-center justify-between rounded-full border px-3 py-3 text-sm backdrop-blur-xl transition-colors sm:px-5",
+          scrolled || menuOpen
+            ? "border-white/15 bg-[#10110f]/90 text-stone-100 shadow-[0_18px_60px_-28px_rgba(0,0,0,0.75)]"
+            : "border-white/10 bg-transparent text-stone-200",
+        )}
       >
-        <div className="mx-1 flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full bg-slate-100 ring-1 ring-blue-200/80">
-          <Link
-            aria-label="Go to home page"
-            href="/"
-            onClick={() => setShowNav(false)}
-            role="button"
-          >
-            <Image src="/next.svg" alt="logo" height={24} priority width={24} />
-          </Link>
-        </div>
-        <motion.ul
-          className={cn(
-            "w-full [--opacity-from:0.1] [--opacity-to:1] flex-col items-center justify-center gap-4 max-sm:gap-3 max-sm:pt-6 sm:flex-row",
-            showNav
-              ? "[--display-from:none] [--display-to:flex]"
-              : "max-sm:[--display-from:none] sm:[--display-to:flex]",
-          )}
-          variants={{
-            hidden: {
-              display: "var(--display-from, none)",
-              opacity: "var(--opacity-from, 1)",
-              transition: { duration: 0.1, delay: 0 },
-            },
-            visible: {
-              display: "var(--display-to, none)",
-              opacity: "var(--opacity-to, 1)",
-              transition: { duration: 0.6, delay: 0.2 },
-            },
-          }}
-          initial={"hidden"}
-          animate={[hidden && !showNav ? "hidden" : "visible", showNav ? "visible" : ""]}
-        >
+        <Link aria-label="Go to home page" className="flex items-center gap-3" href="/">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/8 font-mono text-xs tracking-[0.24em] text-stone-100">
+            s.
+          </span>
+          <div>
+            <p className="text-[0.7rem] tracking-[0.22em] text-[#86d0d8] lowercase">ScanTalino.</p>
+            <p className="text-sm font-semibold text-stone-100">Capture Workspace</p>
+          </div>
+        </Link>
+
+        {/* Desktop nav links */}
+        <ul className="hidden items-center gap-6 text-sm text-stone-300 lg:flex">
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
-              <Link
-                aria-current={pathname === item.href ? "page" : undefined}
-                aria-label={`navigate to ${item.label}`}
-                className={cn(
-                  "cursor-pointer rounded-full px-3 py-1.5 text-[0.84rem] text-slate-700 transition-colors hover:text-blue-700 sm:text-[0.9rem]",
-                  pathname === item.href &&
-                    "bg-transparent text-blue-700 underline decoration-2 underline-offset-[6px] hover:text-blue-700",
-                )}
-                href={item.href}
-                onClick={() => setShowNav(false)}
-                role="button"
-              >
+              <Link className="transition-colors hover:text-[#86d0d8]" href={item.href}>
                 {item.label}
               </Link>
             </li>
           ))}
-        </motion.ul>
+        </ul>
 
-        <motion.div
-          className="w-full [--display-from:none][--display-to:inline-block]"
-          variants={{
-            hidden: {
-              display: "var(--display-from, none)",
-              transition: { delay: 0, duration: 0.3 },
-            },
-            visible: {
-              display: "var(--display-to)",
-              transition: { delay: 0.2, duration: 0.3 },
-            },
-          }}
-          initial="hidden"
-          animate={hidden ? "visible" : "hidden"}
-        >
-          <Button asChild className="w-full" variant="secondary">
-            <Link href="/extract">Quick Extract</Link>
+        {/* Desktop right actions */}
+        <div className="hidden items-center gap-2 lg:flex">
+          <Button
+            asChild
+            className="rounded-full bg-transparent px-5 text-stone-100 hover:bg-white/10"
+            variant="ghost"
+          >
+            <Link href="/sign-in">Sign in</Link>
           </Button>
-        </motion.div>
+          <Button
+            asChild
+            className="rounded-full border border-white/10 bg-white px-5 text-slate-950 hover:bg-stone-100"
+          >
+            <Link href="/sign-up">
+              Start free
+              <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
 
-        <Button
-          className="min-w-[40px] rounded-full text-slate-700 hover:bg-blue-50 hover:text-blue-700 sm:hidden"
-          onClick={() => {
-            setHidden(false);
-            setShowNav((prev) => !prev);
-          }}
-          size={"icon"}
-          variant={"ghost"}
+        {/* Mobile menu toggle */}
+        <button
+          aria-label="Toggle navigation menu"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/8 text-stone-100 transition-colors hover:bg-white/14 lg:hidden"
         >
-          {showNav ? <ChevronUp /> : <ChevronDown />}
-        </Button>
+          <AnimatePresence mode="wait" initial={false}>
+            {menuOpen ? (
+              <motion.span
+                key="close"
+                initial={{ opacity: 0, rotate: -45, scale: 0.7 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 45, scale: 0.7 }}
+                transition={{ duration: 0.18 }}
+              >
+                <X className="h-4 w-4" />
+              </motion.span>
+            ) : (
+              <motion.span
+                key="menu"
+                initial={{ opacity: 0, rotate: 45, scale: 0.7 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: -45, scale: 0.7 }}
+                transition={{ duration: 0.18 }}
+              >
+                <Menu className="h-4 w-4" />
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
       </motion.nav>
-    </header>
+
+      {/* Mobile dropdown */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="mobile-menu"
+            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.97 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="mx-auto mt-2 w-[calc(100%-1.5rem)] max-w-7xl overflow-hidden rounded-[24px] border border-white/15 bg-[#10110f]/95 p-4 shadow-[0_24px_60px_-28px_rgba(0,0,0,0.9)] backdrop-blur-xl lg:hidden"
+          >
+            {/* Nav links */}
+            <ul className="space-y-0.5">
+              {NAV_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={closeMenu}
+                    className="flex items-center rounded-full px-4 py-3 text-sm font-medium text-stone-300 transition-colors hover:bg-white/8 hover:text-stone-100"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {/* Divider */}
+            <div className="my-3 border-t border-white/10" />
+
+            {/* CTA buttons */}
+            <div className="flex flex-col gap-2">
+              <Button
+                asChild
+                className="h-11 w-full rounded-full border border-white/12 bg-transparent text-stone-100 hover:bg-white/10"
+                variant="ghost"
+              >
+                <Link href="/sign-in" onClick={closeMenu}>
+                  Sign in
+                </Link>
+              </Button>
+              <Button
+                asChild
+                className="h-11 w-full rounded-full border border-white/10 bg-white text-slate-950 hover:bg-stone-100"
+              >
+                <Link href="/sign-up" onClick={closeMenu}>
+                  Start free
+                  <ArrowUpRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }

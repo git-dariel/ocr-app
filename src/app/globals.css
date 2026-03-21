@@ -1,13 +1,28 @@
 @import "tailwindcss";
 @import "sileo/styles.css";
 
+/* Class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Light theme (default) */
 :root {
-  --background: #f7faff;
+  --background: #f8fafc;
   --foreground: #0f172a;
   --card: #ffffff;
   --muted: #64748b;
-  --border: #dbeafe;
-  --primary: #1d4ed8;
+  --border: #e2e8f0;
+  --primary: #145d66;
+  --primary-foreground: #ffffff;
+}
+
+/* Dark theme */
+.dark {
+  --background: #11120f;
+  --foreground: #f5f5f4;
+  --card: #171815;
+  --muted: #78716c;
+  --border: rgba(255, 255, 255, 0.1);
+  --primary: #145d66;
   --primary-foreground: #ffffff;
 }
 
@@ -31,4 +46,12 @@ body {
 
 * {
   border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: rgba(20, 93, 102, 0.18);
 }
