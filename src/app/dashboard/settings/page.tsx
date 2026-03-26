@@ -1,81 +1,7 @@
-import {
-  Bell,
-  ChevronRight,
-  Globe,
-  Info,
-  KeyRound,
-  Moon,
-  Palette,
-  ShieldCheck,
-  Sliders,
-  UserCog,
-  Wrench,
-} from "lucide-react";
+import { ChevronRight, Info, Wrench } from "lucide-react";
+import { SETTING_SECTIONS } from "@/features/settings/data/settings-data";
 
 import { DashboardTopbar } from "@/components/layout/dashboard-topbar";
-
-const SETTING_SECTIONS = [
-  {
-    title: "Account",
-    items: [
-      {
-        icon: UserCog,
-        label: "Account preferences",
-        description: "Manage your display name, email, and avatar.",
-      },
-      {
-        icon: KeyRound,
-        label: "Password & authentication",
-        description: "Change your password and configure two-factor authentication.",
-      },
-      {
-        icon: ShieldCheck,
-        label: "Privacy & security",
-        description: "Control who can see your activity and manage active sessions.",
-      },
-    ],
-  },
-  {
-    title: "Appearance",
-    items: [
-      {
-        icon: Palette,
-        label: "Theme",
-        description: "Switch between light and dark mode. Use the sidebar toggle for a quick change.",
-      },
-      {
-        icon: Globe,
-        label: "Language & region",
-        description: "Set your preferred language, date format, and timezone.",
-      },
-    ],
-  },
-  {
-    title: "Notifications",
-    items: [
-      {
-        icon: Bell,
-        label: "Email notifications",
-        description: "Choose which events trigger an email to your inbox.",
-      },
-      {
-        icon: Moon,
-        label: "Do not disturb",
-        description: "Set quiet hours to pause non-critical notifications.",
-      },
-    ],
-  },
-  {
-    title: "Workspace",
-    items: [
-      {
-        icon: Sliders,
-        label: "OCR pipeline defaults",
-        description: "Configure default processing profiles, confidence thresholds, and output formats.",
-      },
-    ],
-  },
-];
 
 export default function SettingsPage() {
   return (
@@ -111,7 +37,8 @@ export default function SettingsPage() {
               Settings are under construction
             </p>
             <p className="mt-0.5 text-sm text-amber-700/80 dark:text-amber-400/70">
-              These settings are not yet functional. Full configuration controls including toggles, selectors, and save actions are coming soon.
+              These settings are not yet functional. Full configuration controls including toggles,
+              selectors, and save actions are coming soon.
             </p>
           </div>
         </div>

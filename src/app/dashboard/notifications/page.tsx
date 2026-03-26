@@ -1,59 +1,7 @@
-import { Bell, CheckCheck, Clock, Info, Megaphone, Wrench } from "lucide-react";
+import { Bell, Info, Wrench } from "lucide-react";
+import { PLACEHOLDER_NOTIFICATIONS } from "@/features/notifications/data/notification-data";
 
 import { DashboardTopbar } from "@/components/layout/dashboard-topbar";
-
-const PLACEHOLDER_NOTIFICATIONS = [
-  {
-    id: 1,
-    icon: CheckCheck,
-    iconBg: "bg-emerald-50 dark:bg-emerald-950/30",
-    iconColor: "text-emerald-600 dark:text-emerald-400",
-    title: "Extraction completed",
-    description: "RCP-2417 from Warehouse Desk was extracted successfully.",
-    time: "2 min ago",
-    unread: true,
-  },
-  {
-    id: 2,
-    icon: Info,
-    iconBg: "bg-[#145d66]/10 dark:bg-[#145d66]/20",
-    iconColor: "text-[#145d66] dark:text-[#86d0d8]",
-    title: "New receipt queued",
-    description: "RCP-2418 from Field Mobile has been added to the queue.",
-    time: "15 min ago",
-    unread: true,
-  },
-  {
-    id: 3,
-    icon: Wrench,
-    iconBg: "bg-amber-50 dark:bg-amber-950/30",
-    iconColor: "text-amber-600 dark:text-amber-400",
-    title: "Review required",
-    description: "RCP-2414 from Store Tablet needs manual review before processing.",
-    time: "1 hr ago",
-    unread: false,
-  },
-  {
-    id: 4,
-    icon: Megaphone,
-    iconBg: "bg-violet-50 dark:bg-violet-950/30",
-    iconColor: "text-violet-600 dark:text-violet-400",
-    title: "System announcement",
-    description: "Scheduled maintenance window on Saturday, Mar 22 from 2–4 AM UTC.",
-    time: "3 hr ago",
-    unread: false,
-  },
-  {
-    id: 5,
-    icon: Clock,
-    iconBg: "bg-slate-100 dark:bg-white/8",
-    iconColor: "text-slate-500 dark:text-stone-400",
-    title: "Weekly summary ready",
-    description: "Your OCR activity report for Mar 15–21 is ready to view.",
-    time: "Yesterday",
-    unread: false,
-  },
-];
 
 export default function NotificationsPage() {
   return (
@@ -89,7 +37,8 @@ export default function NotificationsPage() {
               Notifications are under construction
             </p>
             <p className="mt-0.5 text-sm text-amber-700/80 dark:text-amber-400/70">
-              Real-time notifications, read/unread management, and preference controls are coming soon. The items below are placeholder previews only.
+              Real-time notifications, read/unread management, and preference controls are coming
+              soon. The items below are placeholder previews only.
             </p>
           </div>
         </div>
