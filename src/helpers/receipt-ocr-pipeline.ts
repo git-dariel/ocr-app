@@ -3,6 +3,7 @@ import { preprocessReceiptImage } from "@/helpers/image-preprocessing";
 import { validateReceiptUpload } from "@/validations/validation";
 import { extractReceiptTextWithVision } from "@/services/vision-ocr-service";
 import { parseReceiptText } from "@/helpers/receipt-text-parser";
+import { extractStructuredReceiptWithGemini } from "@/services/gemini-receipt-structured-extract";
 
 export async function runReceiptOcrPipeline(formData: FormData): Promise<ReceiptOcrResponse> {
   const pipelineStartedAt = Date.now();
@@ -22,11 +23,17 @@ export async function runReceiptOcrPipeline(formData: FormData): Promise<Receipt
   const parsingStartedAt = Date.now();
   const parsed = parseReceiptText(extractedText.text);
   const parsingMs = Date.now() - parsingStartedAt;
+
+  const structuredStartedAt = Date.now();
+  const structured = await extractStructuredReceiptWithGemini(extractedText.text);
+  const structuredMs = Date.now() - structuredStartedAt;
+
   const totalMs = Date.now() - pipelineStartedAt;
 
   return {
     text: extractedText.text,
     parsed,
+    structured,
     metadata: {
       image: preprocessedImage.metadata,
       ocr: extractedText.metadata,
@@ -35,6 +42,7 @@ export async function runReceiptOcrPipeline(formData: FormData): Promise<Receipt
         preprocessing: preprocessingMs,
         ocr: ocrMs,
         parsing: parsingMs,
+        structured: structuredMs,
         total: totalMs,
       },
     },

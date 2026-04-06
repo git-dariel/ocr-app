@@ -13,15 +13,29 @@ import { useDeviceCamera } from "@/features/ocr/hooks/use-device-camera";
 
 import { InputPanel } from "@/features/ocr/components/input-panel";
 import { ExtractStatStrip } from "@/features/ocr/components/extract-stat-strip";
-import { RawOutputCard } from "@/features/ocr/components/raw-output-card";
+import { BirPurchasesInquiryTable } from "@/features/ocr/components/bir-purchases-inquiry-table";
+import { UploadedImageViewerCard } from "@/features/ocr/components/uploaded-image-viewer-card";
 import { OcrMetadataCard } from "@/features/ocr/components/ocr-metadata-card";
 
 export function ReceiptOcrWorkbench() {
-  const { file, isSubmitting, result, copied, hasOutput, rawLinesText, selectFile, submit, copyRawLines } =
-    useReceiptOcr();
+  const {
+    file,
+    isSubmitting,
+    result,
+    hasOutput,
+    selectFile,
+    submit,
+  } = useReceiptOcr();
 
-  const { videoRef, isCameraOpen, isCameraLoading, isCameraReady, startCamera, stopCamera, capturePhoto } =
-    useDeviceCamera();
+  const {
+    videoRef,
+    isCameraOpen,
+    isCameraLoading,
+    isCameraReady,
+    startCamera,
+    stopCamera,
+    capturePhoto,
+  } = useDeviceCamera();
 
   const [showUploadPanelMobile, setShowUploadPanelMobile] = useState(true);
 
@@ -90,7 +104,12 @@ export function ReceiptOcrWorkbench() {
         {result && <ExtractStatStrip result={result} />}
 
         {/* Main grid */}
-        <div className={cn("mt-4 grid gap-4 pb-6 sm:mt-6 sm:gap-6 sm:pb-8", "xl:grid-cols-[360px_minmax(0,1fr)]")}>
+        <div
+          className={cn(
+            "mt-4 grid gap-4 pb-6 sm:mt-6 sm:gap-6 sm:pb-8",
+            "xl:grid-cols-[360px_minmax(0,1fr)]",
+          )}
+        >
           {/* Left: Input panel */}
           <div className={cn(hideUploadOnMobile && "hidden xl:block")}>
             <InputPanel
@@ -130,13 +149,11 @@ export function ReceiptOcrWorkbench() {
               </div>
             )}
 
-            <RawOutputCard
+            <UploadedImageViewerCard file={file} />
+
+            <BirPurchasesInquiryTable
+              key={result ? `${result.metadata.ocr.wordCount}-${result.metadata.timingsMs?.total ?? 0}` : "empty"}
               result={result}
-              rawLinesText={rawLinesText}
-              copied={copied}
-              hideUploadOnMobile={hideUploadOnMobile}
-              onCopyRawLines={copyRawLines}
-              onShowUploadPanel={() => setShowUploadPanelMobile(true)}
             />
 
             <OcrMetadataCard result={result} />

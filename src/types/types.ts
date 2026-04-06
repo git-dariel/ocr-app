@@ -1,3 +1,9 @@
+import type {
+  BirPurchaseLineItem,
+  BirPurchaseTotals,
+  BirStructuredReceipt,
+} from "@/schemas/bir-receipt";
+
 export type SupportedImageMimeType =
   | "image/jpeg"
   | "image/png"
@@ -57,6 +63,7 @@ export interface OcrExtractionResult {
 export interface ReceiptOcrResponse {
   text: string;
   parsed: ParsedReceiptText;
+  structured: BirStructuredReceipt;
   metadata: {
     image: ImagePreprocessingMetadata;
     ocr: OcrMetadata;
@@ -65,6 +72,7 @@ export interface ReceiptOcrResponse {
       preprocessing: number;
       ocr: number;
       parsing: number;
+      structured: number;
       total: number;
     };
   };
@@ -73,3 +81,5 @@ export interface ReceiptOcrResponse {
 export interface ParsedReceiptText {
   rawLines: string[];
 }
+
+export type { BirPurchaseLineItem, BirPurchaseTotals, BirStructuredReceipt };

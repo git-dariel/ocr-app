@@ -1,3 +1,5 @@
+import type { BirPurchaseLineItem, BirPurchaseTotals, BirStructuredReceipt } from "@/types/types";
+
 export interface OcrApiErrorPayload {
   error?: {
     code?: string;
@@ -11,6 +13,7 @@ export interface OcrReceiptResponse {
   parsed: {
     rawLines: string[];
   };
+  structured: BirStructuredReceipt;
   metadata: {
     image: {
       inputMimeType: string;
@@ -45,7 +48,10 @@ export interface OcrReceiptResponse {
       preprocessing: number;
       ocr: number;
       parsing: number;
+      structured: number;
       total: number;
     };
   };
 }
+
+export type { BirPurchaseLineItem, BirPurchaseTotals, BirStructuredReceipt };
